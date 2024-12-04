@@ -1,0 +1,3 @@
+/home/nichto-deb/dev/cpp/projek-akhir/build/CMakeFiles/projek-akhir.dir
+/home/nichto-deb/dev/cpp/projek-akhir/build/CMakeFiles/edit_cache.dir
+/home/nichto-deb/dev/cpp/projek-akhir/build/CMakeFiles/rebuild_cache.dir
