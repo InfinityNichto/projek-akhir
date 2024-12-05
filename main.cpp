@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-
 using namespace std;
 
 // OpenGL error handler
@@ -20,7 +19,7 @@ int main(int, char**) {
 		return -1;
 	}
 
-	GLFWwindow *window = glfwCreateWindow(1280, 720, "imgui demo", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(1280, 720, "ImGui - Powered by OpenGL3 + GLFW 3.4", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		cerr << "opengl error: window creation failed" << endl;
@@ -28,8 +27,7 @@ int main(int, char**) {
 	}
 
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // vsync
-	
+	glfwSwapInterval(1); // vsync	
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		cerr << "opengl error: loader init failed" << endl;

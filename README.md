@@ -6,10 +6,14 @@
 
 # Usage:
 1. Clone this repo
-2. Go to the build directory<br>
-   ```cd projek-akhir/build```
+2. Run the init script<br>
+   ```
+   cd ./projek-akhir
+   ./init.sh
+   
+   ```
 3. - Run make-n-run (builds the project and runs it)<br>
-   ```./make-n-run```<br>
+   ```./build/make-n-run```<br>
    - You could also run the binary directly if you don't wanna rebuild the project<br>
-   ```./projek-akhir```
+   ```./build/projek-akhir```
    
