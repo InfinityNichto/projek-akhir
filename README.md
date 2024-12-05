@@ -10,7 +10,6 @@
    ```
    cd ./projek-akhir
    ./init.sh
-   
    ```
 3. - Run make-n-run (builds the project and runs it)<br>
    ```./build/make-n-run```<br>
