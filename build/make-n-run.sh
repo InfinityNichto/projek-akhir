@@ -1,0 +1,1 @@
+make && ./projek-akhir
