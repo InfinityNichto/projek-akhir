@@ -9,6 +9,14 @@
 #include <vector>
 #include <functional>
 
+#ifndef IMGUI_CDECL
+#ifdef _MSC_VER
+#define IMGUI_CDECL __cdecl
+#else
+#define IMGUI_CDECL
+#endif
+#endif
+
 using namespace std;
 
 template <typename... Args>
@@ -26,27 +34,63 @@ const char* build_c_str(Args... args) {
 
 struct Item {
 public:
+    ImGuiID ID;
+
 	string name;
 	string category;
 	float buyPrice;
 	float sellPrice;
 	int stock;
 
-	Item(string name, string category, float buyPrice, float sellPrice, int qty)
+	Item(string name, string category, float buyPrice, float sellPrice, int stock)
 		: name(name), category(category), buyPrice(buyPrice), sellPrice(sellPrice), stock(stock) {};
+
+    static const ImGuiTableSortSpecs* currentSortSpecs;
+    
+    static void sortWithSortSpecs(ImGuiTableSortSpecs* sortSpecs, Item* items, size_t itemsCount) {
+        currentSortSpecs = sortSpecs;
+        if (itemsCount > 1) qsort(items, itemsCount, sizeof(items[0]), Item::compareWithSortSpecs);
+        currentSortSpecs = NULL;
+    }
+
+    static int IMGUI_CDECL compareWithSortSpecs(const void* lhs, const void* rhs) {
+        const Item* a = (const Item*)lhs;
+        const Item* b = (const Item*)rhs;
+
+        for (int i = 0; i < currentSortSpecs->SpecsCount; i++) {
+            const ImGuiTableColumnSortSpecs* sortSpec = &currentSortSpecs->Specs[i];
+            int delta = 0;
+
+            if (sortSpec->ColumnIndex == 0) {
+                delta = (int)a->ID - (int)b->ID;
+            }
+
+            if (delta > 0) {
+                return (sortSpec->SortDirection == ImGuiSortDirection_Ascending) ? 1 : -1;
+            } else if (delta < 0) {
+                return (sortSpec->SortDirection == ImGuiSortDirection_Ascending) ? -1 : 1;
+            }
+        }
+
+        return (int)a->ID - (int)b->ID;
+    }
 };
 
 class Hashed {
 protected:
 	size_t hash;
 
-	size_t computeHash() const {
-		return std::hash<const void*>{}(static_cast<const void*>(this));
+	size_t computeHash(void* seed) const {
+		return std::hash<const void*>{}(seed);
 	}
 
 public:
-	Hashed() : hash(computeHash()) {}
-	virtual ~Hashed() {}
+	Hashed() : hash(0) {}
+    virtual ~Hashed() {}
+
+    void initHash(void* thisPtr) {
+        if (hash == 0) hash = computeHash(thisPtr);
+    }
 
 	size_t getHashCode() const {
 		return hash;
@@ -72,78 +116,26 @@ public:
 	virtual void update() {};
 };
 
-class MainWindow : public WindowLayout {
+class ItemsBrowser : public WindowLayout {
 private:
-	vector<Item> items;
-	size_t itemsCount = 0;
-	string _name;
+    string _name;
 
-	char tmp_newItem_name[128] = "";
-	char tmp_newItem_category[128] = "";
-	float tmp_newItem_buyPrice = 0;
-	float tmp_newItem_sellPrice = 0;
-	int tmp_newItem_stock = 0;
-
-	void drawItemTable() {
-    	ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
-    	if (ImGui::BeginTable("itemsTable", 6, flags)) {
-	        ImGui::TableSetupColumn("No.");
-    	    ImGui::TableSetupColumn("Name");
-    		ImGui::TableSetupColumn("Category");
-        	ImGui::TableSetupColumn("Buy price");
-	        ImGui::TableSetupColumn("Sell price");
-    	    ImGui::TableSetupColumn("Stock");
-        	ImGui::TableHeadersRow();
-
-	        for (int i = 0; i < itemsCount; i++) {
-    	        ImGui::TableNextRow();
-        	    ImGui::TableNextColumn(); ImGui::Text("%d", i + 1);
-            	ImGui::TableNextColumn(); ImGui::Text("%s", items[i].name.c_str());
-	            ImGui::TableNextColumn(); ImGui::Text("%s", items[i].category.c_str());
-    	        ImGui::TableNextColumn(); ImGui::Text("Rp. %d", items[i].buyPrice);
-        	    ImGui::TableNextColumn(); ImGui::Text("Rp. %d", items[i].sellPrice);
-            	ImGui::TableNextColumn(); ImGui::Text("%d", items[i].stock);
-	        }
-
-    	    ImGui::EndTable();
-    	}
-	}
-
-	void drawNewItemForm() {
-		ImGui::Text("Name: ");
-		ImGui::InputText("##inputName", tmp_newItem_name, IM_ARRAYSIZE(tmp_newItem_name));
-
-		ImGui::Text("Category: ");
-		ImGui::InputText("##inputCategory", tmp_newItem_category, IM_ARRAYSIZE(tmp_newItem_category));
-
-		ImGui::Text("Buy price: ");
-		ImGui::InputFloat("##inputBuyPrice", &tmp_newItem_buyPrice);
-
-		ImGui::Text("Sell price: ");
-		ImGui::InputFloat("##inputSellPrice", &tmp_newItem_sellPrice);
-
-		ImGui::Text("Stock: ");
-		ImGui::InputInt("##inputStock", &tmp_newItem_stock);
-	}
+    bool showCategoryIndicator = true;
+    bool allowSorting = true;
+    bool allowDragUnselected = false;
 
 public:
-	MainWindow(string name, float width, float height) : _name(name), WindowLayout(name, width, height) {}
+	ItemsBrowser(string name, float width, float height) : _name(name), WindowLayout(name, width, height) {
+        initHash(this);
+    }
 
 	void draw() override {
 		WindowLayout::draw();
 		ImGui::Begin(name.c_str());
 
-		drawItemTable();
+        
 
-		ImGui::Text("-- Add new item below --");
-		drawNewItemForm();
-
-		if (ImGui::Button("Submit")) {
-			items.push_back(Item(tmp_newItem_name, tmp_newItem_category, tmp_newItem_buyPrice, tmp_newItem_sellPrice, tmp_newItem_stock));
-			itemsCount++;
-		}
-
-		ImGui::End();
+	    ImGui::End();
 	}
 
 	void update() override {
@@ -153,10 +145,13 @@ public:
 };
 
 // OpenGL error handler
-void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity,
-							  GLsizei length, const GLchar *message, const void *userParam) {
+void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
 	cerr << "opengl error: " << message << endl;
 }
+
+float clearColor[3] = {1, 0, 0};
+float cycleInc = 0.005;
+int cyclePtr = 0;
 
 int main(int, char**) {
 	// opengl setup
@@ -189,7 +184,7 @@ int main(int, char**) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 
-	MainWindow mw("Items", 600, 400);
+	ItemsBrowser ib("Items Browser", 600, 400);
 
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -199,12 +194,18 @@ int main(int, char**) {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		mw.draw();
+		ib.draw();
 		ImGui::ShowDemoWindow();
 
 	    ImGui::Render();
         glViewport(0, 0, 1280, 720);
-        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+
+        const int nxPtr = (cyclePtr + 1) % 3;
+        if (clearColor[nxPtr] < 1) clearColor[nxPtr] += cycleInc;
+        else if (clearColor[cyclePtr] > 0) clearColor[cyclePtr] -= cycleInc;
+        else cyclePtr = nxPtr;
+
+        glClearColor(clearColor[0], clearColor[1], clearColor[2], 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
