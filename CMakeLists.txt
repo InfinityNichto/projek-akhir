@@ -8,21 +8,22 @@ set(GLAD_INC ./glad/include)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(SOURCES
-	./main.cpp
-	./imgui/imgui.cpp
-	./imgui/imgui_demo.cpp
-	./imgui/imgui_draw.cpp
-	./imgui/imgui_tables.cpp
-	./imgui/imgui_widgets.cpp
-	./imgui/backends/imgui_impl_glfw.cpp
-	./imgui/backends/imgui_impl_opengl3.cpp
+file(GLOB_RECURSE PROJECT_SOURCES src/*.cpp src/**/*.cpp)
+
+set(IMGUI_SOURCES
+    ./imgui/imgui.cpp
+    ./imgui/imgui_demo.cpp
+    ./imgui/imgui_draw.cpp
+    ./imgui/imgui_tables.cpp
+    ./imgui/imgui_widgets.cpp
+    ./imgui/backends/imgui_impl_glfw.cpp
+    ./imgui/backends/imgui_impl_opengl3.cpp
 )
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
 	./imgui/
 	./imgui/backends
@@ -30,3 +31,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw)
 target_sources(${PROJECT_NAME} PRIVATE ${GLAD_SRC})
+

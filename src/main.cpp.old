@@ -34,7 +34,7 @@ const char* build_c_str(Args... args) {
 
 struct Item {
 public:
-    ImGuiID ID;
+    ImGuiID Id;
 
 	string name;
 	string category;
@@ -62,7 +62,7 @@ public:
             int delta = 0;
 
             if (sortSpec->ColumnIndex == 0) {
-                delta = (int)a->ID - (int)b->ID;
+                delta = (int)a->Id - (int)b->Id;
             }
 
             if (delta > 0) {
@@ -72,7 +72,7 @@ public:
             }
         }
 
-        return (int)a->ID - (int)b->ID;
+        return (int)a->Id - (int)b->Id;
     }
 };
 
@@ -116,6 +116,50 @@ public:
 	virtual void update() {};
 };
 
+class ItemCreationForm : public WindowLayout {
+private:
+	bool isOpen = false;
+	ImVector* items;
+
+	char tmp_name[256];
+	char tmp_category[256]
+	float tmp_buyPrice;
+	float tmp_sellPrice;
+	int tmp_stock;
+
+public:
+	ItemCreationForm(ImVector* items, string name = "Item creation form", float width = 300, float height = 240) : items(items), name(name), width(width), height(height) {
+		if (isOpen) return NULL;
+		isOpen = true;
+	}
+
+	void draw() override {
+		WindowLayout::draw();
+
+		if (!ImGui::Begin(name, isOpen)) {
+			ImGui::End();
+			return;
+		}
+
+		ImGui::Text("Name: ");
+		ImGui::TextInput("##inputName", tmp_name, IM_ARRAYSIZE(tmp_name));
+		ImGui::Text("Category: ");
+		ImGui::TextInput("##inputCategory", tmp_category, IM_ARRAYSIZE(tmp_category));
+		
+		ImGui::Text("Buy price: ");
+		ImGui::FloatInput("##inputBuyPrice", &tmp_buyPrice);
+		ImGui::Text("Sell price: ");
+		ImGui::FloatInput("##inputSellPrice", &tmp_sellPrice);
+
+		ImGui::Text("Stock: ");
+		ImGui::IntInput("##inputStock", &tmp_stock);
+
+		if (ImGui::Button("Submit")) {
+			items->push_back(Item(tmp_name, tmp_category, tmp_buyPrice, tmp_sellPrice, tmp_stock));
+		}
+	}
+};
+
 class ItemsBrowser : public WindowLayout {
 private:
     string _name;
@@ -123,20 +167,68 @@ private:
     bool showCategoryIndicator = true;
     bool allowSorting = true;
     bool allowDragUnselected = false;
+	bool allowBoxSelect = true;
+	float iconSize = 32;
+	int iconSpacing = 10;
+	int iconHitSpacing = 4;
+	bool strechSpacing = true;
+
+	ImVector<Item> items;
+	ImGuiID nextItemId = 0;
+	bool requestDelete = false;
+	bool requestSort = false;
+	float zoomWheelAccum = 0;
+
+	ImVec2 layoutItemSize;
+	ImVec2 layoutItemStep; // layoutItemSize + layoutItemSpacing
+	float layoutItemSpacing = 0;
+	float layoutSelectableSpacing = 0;
+	float layoutOuterPadding = 0;
+	int layoutColumnCount = 0;
+	int layoutLineCount = 0;
 
 public:
-	ItemsBrowser(string name, float width, float height) : _name(name), WindowLayout(name, width, height) {
-        initHash(this);
-    }
+	ItemsBrowser(string name = "Item browser", float width = iconSize * 25, float height = iconSize * 15) : name(name), _name(name), width(width), height(height) {
+		initHash();
+	}
+
+	void AddItem(Item item) {
+		if (items.Size == 0) nextItemId = 0;
+		
+		items.push_back(item);
+		items[items.Size - 1].Id = nextItemId;
+		requestSort = true;
+	}
+
+	void updateLayoutSizes(float availWidth) {
+		layoutItemSpacing = (float)iconSpacing;
+		if (stretchSpacing == false) availWidth += floorf(layoutItemSpacing * 0.5);
+
+		layoutItemSize = ImVec2(floorf(iconSize), floorf(iconSize));
+		layoutColumnCount = IM_MAX((int)(availWidth / (layoutItemSize.x + layoutItemSpacing)), 1);
+		layoutLineCount = (items.Size + layoutColumnCount - 1) / layoutColumnCount;
+
+		if (stretchSpacing && layoutColumnCount > 1) {
+			layoutItemSpacing = floorf(availWidth - layoutItemSize.x * layoutColumnCount) / layoutColumnCount;
+		}
+
+		layoutItemStep = ImVec2(layoutItemSize.x + layoutItemSpacing, layoutItemSize.y + layoutItemSpacing);
+		layoutSelectableSpacing = IM_MAX(floorf(layoutItemSpacing) - iconHitSpacing, 0);
+		layoutOuterPadding = floorf(layoutItemSpacing * 0.5);
+	}
 
 	void draw() override {
 		WindowLayout::draw();
-		ImGui::Begin(name.c_str());
 
-        
+		if (!ImGui::Begin(name)) {
+			ImGui::End();
+			return;
+		}
 
-	    ImGui::End();
-	}
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Item creation window", NULL, false, );
+					
 
 	void update() override {
 		int fps = ImGui::GetIO().Framerate;
@@ -150,7 +242,7 @@ void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum seve
 }
 
 float clearColor[3] = {1, 0, 0};
-float cycleInc = 0.005;
+float cycleInc = 0.01;
 int cyclePtr = 0;
 
 int main(int, char**) {
