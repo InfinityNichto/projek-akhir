@@ -6,7 +6,6 @@
 GLFWwindow* opengl_setup();
 void imgui_setup(GLFWwindow* window);
 void main_loop(GLFWwindow* window);
-void inner_main_loop(GLFWwindow* window);
 void finalize(GLFWwindow* window);
 
 #endif

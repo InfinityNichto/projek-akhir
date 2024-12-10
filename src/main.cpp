@@ -8,7 +8,7 @@ int main() {
         return -1;
     }
 
-    imgui_setup(window);
+	imgui_setup(window);
     main_loop(window);
     finalize(window);
 }
