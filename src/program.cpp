@@ -4,9 +4,11 @@
 #include <glad/glad.h>
 
 #include "program.h"
+#include "utils.h"
 #include "menu_items/file.h"
 #include "menu_items/edit.h"
 #include "menu_items/tools.h"
+#include "menu_items/help.h"
 
 #include <iostream>
 using namespace std;
@@ -88,55 +90,75 @@ void inner_main_loop(GLFWwindow* window) {
 				if (ImGui::MenuItem("Exit")) {
 					item_file_exit(window);
 				}
+				ImGui::SetItemTooltip("Exit the program");
 
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Edit")) {
-				if (ImGui::MenuItem("Style Editor")) {
+				if (ImGui::MenuItem("Style Editor", NULL, show_styleEditor)) {
 					show_styleEditor = !show_styleEditor;
 				}
+				ImGui::SetItemTooltip("Edit current layout styling");
 				
+				ImGui::BeginDisabled();
+
 				if (ImGui::MenuItem("Reset")) {
 					item_edit_reset();
 				}
+
+				ImGui::EndDisabled();
+
+				ImGui::SetItemTooltip("Reset layout styling"); ImGui::SameLine(); help_marker("Unimplemented");
 
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Tools")) {
 				
-				if (ImGui::MenuItem("Metrics/Debugger")) {
+				if (ImGui::MenuItem("Metrics/Debugger", NULL, show_metrics)) {
 					show_metrics = !show_metrics;
 				}
 
-				if (ImGui::MenuItem("GUI item picker")) {
-					show_itemPicker = !show_itemPicker;
-				}
+				ImGui::SetItemTooltip("Show utility window for metrics and debugging");
 
-				if (ImGui::MenuItem("ID stack tool")) {
+				if (ImGui::MenuItem("ID stack tool", NULL, show_stackTool)) {
 					show_stackTool = !show_stackTool;
 				}
+
+				ImGui::SetItemTooltip("Show utility window for inspecting element ID stack");
 				
 				if (ImGui::MenuItem("Demo window", NULL, show_demoWindow)) {
 					show_demoWindow = !show_demoWindow;
 				}
 
+				ImGui::SetItemTooltip("Show the demo window");
+
 				ImGui::EndMenu();
 			}
 
 			if (ImGui::BeginMenu("Help")) {
+				ImGui::BeginDisabled();
+
 				if (ImGui::MenuItem("Guide")) {
-					// ...
+					item_help_guide();
 				}
+	
+				ImGui::EndDisabled();
+
+				ImGui::SetItemTooltip("Open the guide document"); ImGui::SameLine(); help_marker("Unimplemented");
 
 				if (ImGui::MenuItem("Resources")) {
-					// ...
+					show_imguiResources = !show_imguiResources;
 				}
 
+				ImGui::SetItemTooltip("Open useful resources for ImGui development");
+
 				if (ImGui::MenuItem("About")) {
-					// ...
+					show_aboutWindow = !show_aboutWindow;
 				}
+
+				ImGui::SetItemTooltip("About this program");
 
 				ImGui::EndMenu();
 			}
@@ -148,6 +170,8 @@ void inner_main_loop(GLFWwindow* window) {
 		item_tools_metrics();
 		item_tools_stackTool();
 		item_tools_demoWindow();
+		item_help_resources(&show_imguiResources);
+		item_help_about(&show_aboutWindow);
 
 		ImGui::Text("Fullscreen, non-resizable");
 	}

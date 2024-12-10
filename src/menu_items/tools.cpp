@@ -8,16 +8,14 @@ bool show_stackTool = false;
 bool show_demoWindow = false;
 
 void item_tools_metrics() {
-	ImGui::ShowMetricsWindow(&show_metrics);
+	if (show_metrics) ImGui::ShowMetricsWindow(&show_metrics);
 }
 
-void item_tools_itemPicker() {}
-
 void item_tools_stackTool() {
-	ImGui::ShowIDStackToolWindow(&show_stackTool);
+	if (show_stackTool) ImGui::ShowIDStackToolWindow(&show_stackTool);
 }
 
 void item_tools_demoWindow() {
-	ImGui::ShowDemoWindow(&show_demoWindow);
+	if (show_demoWindow) ImGui::ShowDemoWindow(&show_demoWindow);
 }
 
