@@ -25,6 +25,7 @@ find_package(glfw3 REQUIRED)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${IMGUI_SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE
+	./include/
 	./imgui/
 	./imgui/backends
 	${GLAD_INC}

@@ -1,6 +1,6 @@
 #include "imgui.h"
-#include "help.h"
-#include "../utils.h"
+#include "utils.h"
+#include "windows/menu_items/help.h"
 
 bool show_imguiResources = false;
 bool show_aboutWindow = false;
@@ -123,7 +123,7 @@ void item_help_about(bool* show) {
 	if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         text_centered("V-ME", 0);
         ImGui::Separator();
-        ImGui::Text("Version: 737bb43");
+        ImGui::Text("Version: 9b60a1f");
         ImGui::Text("Source:"); ImGui::SameLine(); hyperlink("InfinityNichto/projek-akhir", "https://github.com/InfinityNichto/projek-akhir");
         ImGui::Text("ImGui: v1.91.5");
         ImGui::Separator();

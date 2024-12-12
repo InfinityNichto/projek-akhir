@@ -3,7 +3,7 @@
 
 #include "backends/imgui_impl_glfw.h"
 
-void item_file_exit(GLFWwindow* window);
+void item_file_exit();
 
 #endif
 

@@ -1,26 +1,23 @@
 #include <GLFW/glfw3.h>
 #include "imgui.h"
 
-#include "main_window.h"
+#include "vars.h"
 #include "utils.h"
-#include "menu_items/file.h"
-#include "menu_items/edit.h"
-#include "menu_items/tools.h"
-#include "menu_items/help.h"
+#include "windows/menu_bar_window.h"
+#include "windows/menu_items/file.h"
+#include "windows/menu_items/edit.h"
+#include "windows/menu_items/tools.h"
+#include "windows/menu_items/help.h"
 
-void main_window(GLFWwindow* window) {
-	ImGuiIO& io = ImGui::GetIO();
-	ImVec2 window_size = io.DisplaySize;
+void menu_bar_window() {
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::SetNextWindowSize(ImVec2(display_size().x, 46));
+	ImGui::SetNextWindowBgAlpha(1);
 
-	ImGui::SetNextWindowSize(window_size); // fullscreen
-	ImGui::SetNextWindowPos(ImVec2(0, 0)); // from 0, 0
-	ImGui::SetNextWindowBgAlpha(1); // no transparency
+	ImGuiWindowFlags window_flags = common_window_flags | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
-	ImGuiWindowFlags flags = ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-							 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-	if (ImGui::Begin("Item browser", NULL, flags)) {
-		menu_bar(window);
+	if (ImGui::Begin("##menu_bar", NULL, window_flags)) {
+		menu_bar();
 
 		item_edit_styleEditor();
 		item_tools_metrics();
@@ -31,15 +28,16 @@ void main_window(GLFWwindow* window) {
 
 		tab_bar();
 
+		update_prev_window_data();
 		ImGui::End();
 	}
 }
 
-void menu_bar(GLFWwindow* window) {
+void menu_bar() {
 	if (!ImGui::BeginMenuBar()) return;
 
 	if (ImGui::BeginMenu("File")) {
-		if (ImGui::MenuItem("Exit")) item_file_exit(window);
+		if (ImGui::MenuItem("Exit")) item_file_exit();
 		ImGui::SetItemTooltip("Exit the program");
 
 		ImGui::EndMenu();
@@ -90,4 +88,16 @@ void menu_bar(GLFWwindow* window) {
 }
 
 void tab_bar() {
+	if (!ImGui::BeginTabBar("##tab_bar")) return;
+
+	if (ImGui::BeginTabItem("Workspace")) {
+		ImGui::EndTabItem();
+	}
+
+	if (ImGui::BeginTabItem("Logs")) {
+		ImGui::EndTabItem();
+	}
+
+	ImGui::EndTabBar();
 }
+

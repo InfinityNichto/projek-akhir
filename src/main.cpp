@@ -1,15 +1,16 @@
 #include "program.h"
+#include "vars.h"
 #include <iostream>
 
 int main() {
-	GLFWwindow* window = opengl_setup();
-    if (!window) {
+	opengl_setup();
+    if (!glfw_window) {
 		std::cerr << "opengl setup failed" << std::endl;
         return -1;
     }
 
-	imgui_setup(window);
-    main_loop(window);
-    finalize(window);
+	imgui_setup();
+    main_loop();
+    finalize();
 }
 

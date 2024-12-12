@@ -1,5 +1,5 @@
 #include "imgui.h"
-#include "edit.h"
+#include "windows/menu_items/edit.h"
 
 bool show_styleEditor = false;
 
