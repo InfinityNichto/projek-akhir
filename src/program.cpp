@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 
 #include "program.h"
+#include "vars.h"
 #include "windows/menu_bar_window.h"
 #include "windows/workspace.h"
 
@@ -13,19 +14,6 @@
 #include <iostream>
 using namespace std;
 
-GLFWwindow* glfw_window;
-ImVec2 prev_window_pos;
-ImVec2 prev_window_size;
-
-ImVec2 display_size() {
-    return ImGui::GetIO().DisplaySize;
-}
-
-void update_prev_window_data() {
-	prev_window_pos = ImGui::GetWindowPos();
-	prev_window_size = ImGui::GetWindowSize();
-}
-
 void opengl_setup() {
     if (!glfwInit()) {
         cerr << "opengl error: glfwInit failed" << endl;
@@ -33,7 +21,7 @@ void opengl_setup() {
     }
 
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    glfw_window = glfwCreateWindow(GL_WINDOW_SIZE, GL_WINDOW_HEIGHT, "Dear ImGui - Powered by OpenGL3 + GLFW | <Esc> to exit", NULL, NULL);
+    glfw_window = glfwCreateWindow(GL_WINDOW_SIZE, GL_WINDOW_HEIGHT, "V-ME - Powered by OpenGL3 + GLFW | <Esc> to exit", NULL, NULL);
     if (!glfw_window) {
         glfwTerminate();
         cerr << "opengl error: window creation failed" << endl;
@@ -81,8 +69,8 @@ void imgui_style() {
 	colors[ImGuiCol_FrameBg]                = ImVec4(0.16f, 0.29f, 0.48f, 0.54f);
 	colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
 	colors[ImGuiCol_FrameBgActive]          = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
-	colors[ImGuiCol_TitleBg]                = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-	colors[ImGuiCol_TitleBgActive]          = ImVec4(0.16f, 0.29f, 0.48f, 1.00f);
+	colors[ImGuiCol_TitleBg]                = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+	colors[ImGuiCol_TitleBgActive]          = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 	colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
 	colors[ImGuiCol_MenuBarBg]              = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
 	colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
@@ -92,9 +80,9 @@ void imgui_style() {
 	colors[ImGuiCol_CheckMark]              = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
 	colors[ImGuiCol_SliderGrab]             = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
 	colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	colors[ImGuiCol_Button]                 = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-	colors[ImGuiCol_ButtonHovered]          = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	colors[ImGuiCol_ButtonActive]           = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+	colors[ImGuiCol_Button]                 = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
+	colors[ImGuiCol_ButtonHovered]          = ImVec4(0.33f, 0.33f, 0.33f, 0.80f);
+	colors[ImGuiCol_ButtonActive]           = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
 	colors[ImGuiCol_Header]                 = ImVec4(0.26f, 0.59f, 0.98f, 0.31f);
 	colors[ImGuiCol_HeaderHovered]          = ImVec4(0.26f, 0.59f, 0.98f, 0.80f);
 	colors[ImGuiCol_HeaderActive]           = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
@@ -137,6 +125,8 @@ void main_loop() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+		update_imgui_stats();
 
 		menu_bar_window();
 		workspace();

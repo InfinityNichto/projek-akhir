@@ -3,7 +3,7 @@
 
 #include <string>
 
-struct item {
+struct Item {
 	int unique_id;
 
 	std::string name;
@@ -12,12 +12,12 @@ struct item {
 	float sell_price;
 	int stock;
 
-	item();
-	item(std::string name, std::string category, float buy_price, float sell_price, int stock);
+	Item();
+	Item(std::string name, std::string category, float buy_price, float sell_price, int stock);
 
 	std::string to_string() const;
 	void display() const;
-	void draw();
+	void draw() const;
 };
 
 #endif

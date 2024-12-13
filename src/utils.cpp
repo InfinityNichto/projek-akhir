@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <string>
+
 #ifdef _WIN32
 	#include <windows.h>
 #endif
@@ -71,5 +73,13 @@ void cycle_rainbow(ImVec4* color, size_t* cycle_ptr, float inc) {
     if (nx <= 1) nx += inc;
     else if (current >= 0) current -= inc;
     else *cycle_ptr = nx_ptr;
+}
+
+const char*ImVec2_to_cstr(const ImVec2& vec) {
+	return build_cstr("[", vec.x, ", ", vec.y, "]");
+}
+
+const char* ImVec4_to_cstr(const ImVec4& vec) {
+	return build_cstr("[", vec.x, ", ", vec.y, ", ", vec.z, ", ", vec.w, "]");
 }
 
