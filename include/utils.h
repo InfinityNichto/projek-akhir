@@ -9,6 +9,25 @@
 #include <random>
 #include <limits>
 
+// forward declaration from vars.h to vars.cpp
+extern std::mt19937 rng;
+
+struct scrolling_text {
+private:
+	std::string original;
+	std::string display;
+	size_t limit;
+	float step;
+	size_t size;
+
+public:
+	scrolling_text(std::string text, size_t limit);
+	void scroll(float inc);
+	void reset();
+	std::string str() const;
+	const char* cstr() const;
+};
+
 void hyperlink(const char* desc, const char* url);
 void text_centered(const char* text, int type);
 void help_marker(const char* desc);

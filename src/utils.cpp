@@ -3,11 +3,45 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 #include <string>
 
 #ifdef _WIN32
 	#include <windows.h>
 #endif
+
+scrolling_text::scrolling_text(std::string text, size_t limit) : original(text + " ~ "), display(original), limit(limit), step(0) {
+	size = original.length();
+	while (size < limit) {
+      original += original;
+      size += size;
+    }
+}
+
+void scrolling_text::scroll(float inc) {
+	size_t floored = std::floor(step);
+	size_t gap = size - floored;
+
+	log_tty("%s", display.c_str());
+	if (gap > limit) display = original.substr(floored, limit);
+	else display = original.substr(floored, gap) + original.substr(0, limit - gap);
+	log_tty("%s", display.c_str());
+
+	float incremented = step + inc;
+	step = incremented > size ? incremented - size : incremented;
+}
+
+void scrolling_text::reset() {
+	display = original;
+}
+
+std::string scrolling_text::str() const {
+	return display;
+}
+
+const char* scrolling_text::cstr() const {
+	return display.c_str();
+}
 
 void hyperlink(const char* desc, const char* url) {
 	ImGui::TextColored(ImVec4(0.0f, 0.5f, 1.0f, 1.0f), "%s", desc);

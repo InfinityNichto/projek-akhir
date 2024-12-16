@@ -2,7 +2,6 @@
 
 #include "imgui.h"
 #include <GLFW/glfw3.h>
-#include <vector>
 #include <random>
 
 GLFWwindow* glfw_window;
@@ -14,9 +13,6 @@ ImVec2 glyph_size;
 
 std::random_device rand_dev;
 std::mt19937 rng(rand());
-
-std::vector<Item> items = {};
-std::vector<Item> items_history = {};
 
 ImVec2 display_size() {
     return ImGui::GetIO().DisplaySize;

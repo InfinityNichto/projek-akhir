@@ -25,11 +25,11 @@ void side_bar() {
 	ImGui::Begin("Side bar", NULL, window_flags);
 
 	if (ImGui::Button("Push dummy item")) {
-		items.push_back(Item());
+		Item::items.push_back(Item());
 	}
 
 	if (ImGui::Button("Pop last item")) {
-		items.pop_back();
+		Item::items.pop_back();
 	}
 
 	ImGui::PopStyleColor(1);
@@ -59,7 +59,8 @@ void item_display() {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-	for (Item item : items) {
+	for (Item item : Item::items) {
+		item.update();
 		item.draw();
 	}
 	ImGui::PopStyleVar(2);

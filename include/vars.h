@@ -1,7 +1,6 @@
 #ifndef VARS_H
 #define VARS_H
 
-#include "vme/item.h"
 #include "imgui.h"
 #include <GLFW/glfw3.h>
 #include <vector>
@@ -16,8 +15,6 @@ extern ImVec2 mouse_pos;
 extern float fps;
 extern ImVec2 glyph_size;
 constexpr float magic_padding = -13.5;
-extern std::vector<Item> items;
-extern std::vector<Item> items_history;
 extern std::random_device rand_dev;
 extern std::mt19937 rng;
 
