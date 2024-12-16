@@ -83,3 +83,28 @@ const char* ImVec4_to_cstr(const ImVec4& vec) {
 	return build_cstr("[", vec.x, ", ", vec.y, ", ", vec.z, ", ", vec.w, "]");
 }
 
+void draw_grid(size_t count, float thickness) {
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImVec2 window_pos = ImGui::GetWindowPos();
+	ImVec2 window_size = ImGui::GetWindowSize();
+	ImVec2 step = ImVec2(window_size.x / count, window_size.y / count);
+
+	for (size_t i = 0; i < count; i++) {
+		ImVec2 incremented = ImVec2(window_pos.x + step.x * i, window_pos.y + step.y * i);
+	
+		draw_list->AddLine(
+			ImVec2(window_pos.x, incremented.y),
+			ImVec2(window_pos.x + window_size.x, incremented.y),
+			IM_COL32(88, 88, 88, 176),
+			thickness
+		);
+
+		draw_list->AddLine(
+			ImVec2(incremented.x, window_pos.y),
+			ImVec2(incremented.x, window_pos.y + window_size.y),
+			IM_COL32(88, 88, 88, 176),
+			thickness
+		);
+	}
+}
+

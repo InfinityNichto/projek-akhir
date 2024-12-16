@@ -23,6 +23,7 @@ extern std::mt19937 rng;
 
 ImVec2 display_size();
 void update_prev_window_data();
+void init_imgui_stats();
 void update_imgui_stats();
 
 #endif

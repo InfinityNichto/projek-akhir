@@ -16,6 +16,7 @@ void open_url(const char* url);
 void cycle_rainbow(ImVec4* color, size_t* cycle_ptr, float inc);
 const char* ImVec2_to_cstr(const ImVec2& vec);
 const char* ImVec4_to_cstr(const ImVec4& vec);
+void draw_grid(size_t count, float thickness);
 
 template <typename T> inline T next_int() {
 	std::uniform_int_distribution<T> range_dist(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());

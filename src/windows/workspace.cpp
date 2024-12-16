@@ -64,6 +64,7 @@ void item_display() {
 	}
 	ImGui::PopStyleVar(2);
 
+	draw_grid(25, 1);
 	write_stats();
 
 	ImGui::PopStyleColor(1);

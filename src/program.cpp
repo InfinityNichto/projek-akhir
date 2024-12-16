@@ -46,6 +46,7 @@ void imgui_setup() {
     ImGui_ImplGlfw_InitForOpenGL(glfw_window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+	init_imgui_stats();
 	imgui_style();
 }
 

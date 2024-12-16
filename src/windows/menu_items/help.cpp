@@ -123,7 +123,7 @@ void item_help_about(bool* show) {
 	if (ImGui::BeginPopupModal("About", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
         text_centered("V-ME", 0);
         ImGui::Separator();
-        ImGui::Text("Version: 9b60a1f");
+        ImGui::Text("Version: 65f5f53 (build 231)");
         ImGui::Text("Source:"); ImGui::SameLine(); hyperlink("InfinityNichto/projek-akhir", "https://github.com/InfinityNichto/projek-akhir");
         ImGui::Text("ImGui: v1.91.5");
         ImGui::Separator();
