@@ -5,13 +5,39 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
+#include <ctime>
+#include <iomanip>
 
 #ifdef _WIN32
 	#include <windows.h>
 #endif
 
+rect::rect(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+rect::rect(ImVec2 pos, float w, float h) : x(pos.x), y(pos.y), w(w), h(h) {}
+rect::rect(float x, float y, ImVec2 size) : x(x), y(y), w(size.x), h(size.y) {}
+rect::rect(ImVec2 pos, ImVec2 size) : x(pos.x), y(pos.y), w(size.x), h(size.y) {}
+
+rect::rect(const rect& other) = default;
+rect& rect::operator=(const rect& other) = default;
+
+ImVec2 rect::pos() const { return ImVec2(x, y); }
+ImVec2 rect::size() const { return ImVec2(w, h); }
+ImVec2 rect::top_left() const { return ImVec2(x, y); }
+ImVec2 rect::top_right() const { return ImVec2(x + w, y); }
+ImVec2 rect::bottom_left() const { return ImVec2(x, y + h); }
+ImVec2 rect::bottom_right() const { return ImVec2(x + w, y + h); }
+ImVec2 rect::mid_left() const { return ImVec2(x, h * 0.5 + y); }
+ImVec2 rect::mid_right() const { return ImVec2(x + w, h * 0.5 + y); }
+ImVec2 rect::mid_top() const { return ImVec2(w * 0.5 + x, y); }
+ImVec2 rect::mid_bottom() const { return ImVec2(w * 0.5 + x, y + h); }
+ImVec2 rect::center() const { return ImVec2(w * 0.5 + x, h * 0.5 + y); }
+
+std::string rect::to_string() {
+    return build_str("[", x, ", ", y, ", ", w, ", ", h, "]");
+}
+
 scrolling_text::scrolling_text(std::string text, size_t limit) : original(text + " ~ "), display(original), limit(limit), step(0) {
-	size = original.length();
+    size = original.length();
 	while (size < limit) {
       original += original;
       size += size;
@@ -22,10 +48,8 @@ void scrolling_text::scroll(float inc) {
 	size_t floored = std::floor(step);
 	size_t gap = size - floored;
 
-	log_tty("%s", display.c_str());
 	if (gap > limit) display = original.substr(floored, limit);
 	else display = original.substr(floored, gap) + original.substr(0, limit - gap);
-	log_tty("%s", display.c_str());
 
 	float incremented = step + inc;
 	step = incremented > size ? incremented - size : incremented;
@@ -56,19 +80,38 @@ void hyperlink(const char* desc, const char* url) {
 }
 
 void text_centered(const char* text, int type) {
-    auto windowWidth = ImGui::GetWindowSize().x;
-    auto textWidth   = ImGui::CalcTextSize(text).x;
+    float window_width = ImGui::GetWindowSize().x;
+    float text_width = ImGui::CalcTextSize(text).x;
 
-    ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5);
+    ImGui::SetCursorPosX((window_width - text_width) * 0.5);
     switch (type) {
       case 0:
         ImGui::TextUnformatted(text);
-        break;
-    
+        break;   
       case 1:
         ImGui::TextDisabled("%s", text);
         break;
     }
+}
+
+void text_centered_vh(const char* text, int type) {
+    rect window_data = get_current_window_data();
+    ImVec2 text_size = ImGui::CalcTextSize(text);
+
+    ImGui::SetCursorPos(ImVec2((window_data.w - text_size.x) * 0.5, (window_data.h * 0.5) - text_size.y));
+    switch(type) {
+      case 0:
+        ImGui::TextUnformatted(text);
+        break;
+      case 1:
+        ImGui::TextDisabled("%s", text);
+        break;
+    }
+}
+
+void separator_heading(const char* heading) {
+    ImGui::Spacing(); text_centered(heading, 1);
+    ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
 }
 
 void help_marker(const char* desc) {
@@ -109,8 +152,16 @@ void cycle_rainbow(ImVec4* color, size_t* cycle_ptr, float inc) {
     else *cycle_ptr = nx_ptr;
 }
 
-const char*ImVec2_to_cstr(const ImVec2& vec) {
+std::string ImVec2_to_str(const ImVec2& vec) {
+    return build_str("[", vec.x, ", ", vec.y, "]");
+}
+
+const char* ImVec2_to_cstr(const ImVec2& vec) {
 	return build_cstr("[", vec.x, ", ", vec.y, "]");
+}
+
+std::string ImVec4_to_str(const ImVec4& vec) {
+    return build_str("[", vec.x, ", ", vec.y, ", ", vec.z, ", ", vec.w, "]");
 }
 
 const char* ImVec4_to_cstr(const ImVec4& vec) {
@@ -140,5 +191,13 @@ void draw_grid(size_t count, float thickness) {
 			thickness
 		);
 	}
+}
+
+std::tm as_localtime(std::time_t time) {
+    return *std::localtime(&time);
+}
+
+std::string format_time(std::tm localtime, const char* fmt) {
+    return build_str(std::put_time(&localtime, fmt));
 }
 

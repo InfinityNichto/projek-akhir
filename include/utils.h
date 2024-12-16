@@ -8,9 +8,39 @@
 #include <sstream>
 #include <random>
 #include <limits>
+#include <chrono>
 
 // forward declaration from vars.h to vars.cpp
 extern std::mt19937 rng;
+
+struct rect {
+    float x;
+    float y;
+    float w;
+    float h;
+
+    rect(float x, float y, float w, float h);
+    rect(ImVec2 pos, float w, float h);
+    rect(float x, float y, ImVec2 size);
+    rect(ImVec2 pos, ImVec2 size);
+
+    rect(const rect& other);
+    rect& operator=(const rect& other);
+
+    ImVec2 pos() const;
+    ImVec2 size() const;
+    ImVec2 top_left() const;
+    ImVec2 top_right() const;
+    ImVec2 bottom_left() const;
+    ImVec2 bottom_right() const;
+    ImVec2 mid_left() const;
+    ImVec2 mid_right() const;
+    ImVec2 mid_top() const;
+    ImVec2 mid_bottom() const;
+    ImVec2 center() const;
+
+    std::string to_string();
+};
 
 struct scrolling_text {
 private:
@@ -30,12 +60,19 @@ public:
 
 void hyperlink(const char* desc, const char* url);
 void text_centered(const char* text, int type);
+void text_centered_vh(const char* text, int type);
+void separator_heading(const char* heading);
 void help_marker(const char* desc);
 void open_url(const char* url);
 void cycle_rainbow(ImVec4* color, size_t* cycle_ptr, float inc);
+std::string ImVec2_to_str(const ImVec2& vec);
 const char* ImVec2_to_cstr(const ImVec2& vec);
+std::string ImVec2_to_str(const ImVec4& vec);
 const char* ImVec4_to_cstr(const ImVec4& vec);
 void draw_grid(size_t count, float thickness);
+void separator_heading(const char* heading);
+std::tm as_localtime(time_t time);
+std::string format_time(std::tm localtime, const char* fmt);
 
 template <typename T> inline T next_int() {
 	std::uniform_int_distribution<T> range_dist(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
@@ -94,7 +131,7 @@ template <typename... Args> inline std::string build_str(Args... args) {
 	return ss.str();
 }
 
-// unsafe, try to use build_str(...).c_str() instead
+// unsafe and buggy, try to use build_str(...).c_str() instead
 template <typename... Args> inline const char* build_cstr(Args... args) {
 	std::string buf = build_str(args...);
 	return buf.c_str();
