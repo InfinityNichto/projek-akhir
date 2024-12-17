@@ -58,7 +58,7 @@ void side_bar() {
 	}
 
 	if (ImGui::Button("Pop last item")) {
-		items.pop_back();
+		if (items.size() > 0) items.pop_back();
 	}
 
 	if (ImGui::Button("Switch display mode")) {
