@@ -12,6 +12,7 @@ private:
     scrolling_text sc_category;
 	size_t char_limit;
     ImVec2 start_pos;
+	ImVec4 border_color;
 	int unique_id;
 
 public:
@@ -32,7 +33,7 @@ public:
 	std::string to_string() const;
 	int get_id() const;
 	void update();
-	void draw() const;
+	void draw();
 };
 
 #endif

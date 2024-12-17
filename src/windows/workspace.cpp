@@ -10,9 +10,6 @@
 
 ImVec2 side_bar_size;
 
-char tmp_newItem_name[64];
-std::string tmp_newItem_category[64];
-
 void workspace() {
 	side_bar();
 	item_display();
@@ -32,9 +29,29 @@ void side_bar() {
 	ImGui::Begin("Side bar", NULL, window_flags);
 
     separator_heading("Add new item");
-    ImGui::Text("new item form here");
+	ImGui::TextUnformatted("Name: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputText("##vme_name_input", new_item_name, sizeof(new_item_name)); ImGui::PopItemWidth();
+	ImGui::TextUnformatted("Category: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputText("##vme_category_input", new_item_category, sizeof(new_item_category)); ImGui::PopItemWidth();
+	ImGui::TextUnformatted("Buy price: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputFloat("##vme_buy_price_input", &new_item_buy_price); ImGui::PopItemWidth(); 
+	ImGui::TextUnformatted("Sell price: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputFloat("##vme_sell_price_input", &new_item_sell_price); ImGui::PopItemWidth(); 
+	ImGui::TextUnformatted("Stock: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputInt("##vme_stock_input", &new_item_stock); ImGui::PopItemWidth();
+	if (ImGui::Button("Submit")) {
+		Item item = Item(std::string(new_item_name), std::string(new_item_category), new_item_buy_price, new_item_sell_price, new_item_stock);
+		item.add_to_items();
+	}
 
-    separator_heading("Dummy control");
+	separator_heading("Controls");
+	if (ImGui::Button("Remove selected item")) {
+		if (selected_item != nullptr) {
+			selected_item->remove_from_items();
+			selected_item = nullptr;
+		}
+	}
+
 	if (ImGui::Button("Push dummy item")) {
 		Item item = Item();
         item.add_to_items();
@@ -43,6 +60,11 @@ void side_bar() {
 	if (ImGui::Button("Pop last item")) {
 		items.pop_back();
 	}
+
+	if (ImGui::Button("Switch display mode")) {
+		current_display_type = static_cast<DISPLAY_TYPE>((static_cast<int>(current_display_type) + 1) % 3);
+	} text_hover_formatted("Current display type: %s", display_type_to_string(current_display_type).c_str());
+
 
 	ImGui::PopStyleColor(1);
     update_prev_window_data();
@@ -60,9 +82,11 @@ void write_stats() {
 
 void item_display() {
 	ImVec2 display = display_size();
+	ImVec2 next_pos = ImVec2(prev_window_data.w, prev_window_data.y);
+	ImVec2 next_size = ImVec2(display.x * 0.625, prev_window_data.h);
 
-	ImGui::SetNextWindowPos(ImVec2(prev_window_data.w, prev_window_data.y));
-	ImGui::SetNextWindowSize(ImVec2(display.x * 0.625, prev_window_data.h));
+	ImGui::SetNextWindowPos(next_pos);
+	ImGui::SetNextWindowSize(next_size);
 	ImGui::SetNextWindowBgAlpha(1);
 
 	ImGuiWindowFlags window_flags = common_window_flags & ~(ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse);
@@ -72,9 +96,18 @@ void item_display() {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+	size_t i = 0, padding = 5;
 	for (Item& item : items) {
+		if (current_display_type == DISPLAY_TYPE::TILED) {
+			size_t items_per_row = (next_size.x - padding) / (65 + padding);
+			size_t row = i / items_per_row, col = i % items_per_row;
+			next_start_pos = ImVec2(next_pos.x + padding + col * (65 + padding), next_pos.y + 25 + row * (65 + padding));
+		}
+
 		item.update();
 		item.draw();
+		i++;
 	}
 	ImGui::PopStyleVar(2);
 
@@ -87,6 +120,16 @@ void item_display() {
 	ImGui::End();
 }
 
+void write_item_info(Item item) {
+    text_wrapped("Name: %s", hovered_item.name.c_str());
+    text_wrapped("Category: %s", hovered_item.category.c_str());
+    text_wrapped("Buy price: Rp. %.2f", hovered_item.buy_price);
+    text_wrapped("Sell price: Rp. %.2f", hovered_item.sell_price);
+	text_wrapped("Stock: x%d", hovered_item.stock);
+    text_wrapped("Created at: %lds since unix epoch", hovered_item.time_added_unix);
+    text_wrapped("            %s", format_time(hovered_item.time_added_local, "%Y-%m-%d/%H:%M:%S").c_str());
+}
+
 void item_info() {
 	ImGui::SetNextWindowPos(ImVec2(prev_window_data.x + prev_window_data.w, prev_window_data.y));
 	ImGui::SetNextWindowSize(ImVec2(display_size().x * 0.21875, side_bar_size.y));
@@ -97,18 +140,14 @@ void item_info() {
 
 	ImGui::Begin("Properties", NULL, window_flags);
 
-    if (hover_item_valid) {
-        ImGui::Text("Name: %s", hovered_item.name.c_str());
-        ImGui::Text("Category: %s", hovered_item.category.c_str());
-        ImGui::Text("Buy price: Rp. %.2f", hovered_item.buy_price);
-        ImGui::Text("Sell price: Rp. %.2f", hovered_item.sell_price);
-        ImGui::Text("Stock: x%d", hovered_item.stock);
-        ImGui::Separator();
-        ImGui::Text("Created at: %lds since unix epoch", hovered_item.time_added_unix);
-        ImGui::Text("            %s", format_time(hovered_item.time_added_local, "%Y-%m-%d/%H:%M:%S").c_str());
-    } else {
-        ImGui::BeginDisabled(); ImGui::Text("Hover on an item to see their properties"); ImGui::EndDisabled();
-    } hover_item_valid = false;
+	separator_heading("Hovered item properties");
+    if (hover_item_valid) write_item_info(hovered_item);
+    else { ImGui::BeginDisabled(); text_wrapped("Hover on an item to see their properties"); ImGui::EndDisabled(); }
+    hover_item_valid = false;
+
+	separator_heading("Selected item properties");
+	if (selected_item != nullptr) write_item_info(*selected_item);
+	else { ImGui::BeginDisabled(); text_wrapped("Selected item properties will appear here"); ImGui::EndDisabled(); }
 
 	ImGui::PopStyleColor(1);
 	ImGui::End();

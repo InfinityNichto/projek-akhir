@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include <string>
 #include <sstream>
+#include <vector>
 #include <random>
 #include <limits>
 #include <chrono>
@@ -73,6 +74,31 @@ void draw_grid(size_t count, float thickness);
 void separator_heading(const char* heading);
 std::tm as_localtime(time_t time);
 std::string format_time(std::tm localtime, const char* fmt);
+
+template <typename... Args> inline void text_hover_formatted(const char* fmt, Args... args) {
+	if (ImGui::IsItemHovered()) {
+		ImGui::SetTooltip(fmt, args...);
+	}
+}
+
+template <typename... Args> inline void text_centered_formatted(const char* fmt, Args... args) {
+	size_t buf_len = std::snprintf(nullptr, 0, fmt, args...) + 1;
+	std::vector<char> buf(buf_len);
+	std::snprintf(buf.data(), buf_len, fmt, args...);
+	const char* text = buf.data();
+
+	float window_width = ImGui::GetWindowSize().x;
+    float text_width = ImGui::CalcTextSize(text).x;
+
+    ImGui::SetCursorPosX((window_width - text_width) * 0.5);
+    ImGui::Text("%s", text);
+}
+
+template <typename... Args> inline void text_wrapped(const char* fmt, Args... args) {
+	ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
+	ImGui::TextWrapped(fmt, args...);
+	ImGui::PopTextWrapPos();
+}
 
 template <typename T> inline T next_int() {
 	std::uniform_int_distribution<T> range_dist(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
