@@ -4,6 +4,7 @@
 #include "vme/item.h"
 #include "vme/item_vars.h"
 #include "windows/workspace.h"
+#include "windows/log.h"
 
 #include <string>
 #include <ctime>
@@ -28,6 +29,22 @@ void side_bar() {
 
 	ImGui::Begin("Side bar", NULL, window_flags);
 
+    separator_heading("Finances");
+    ImGui::TextUnformatted("Total saving: "); ImGui::SameLine(0, 0);
+	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputFloat("##vme_total_saving_input", &new_total_saving); ImGui::PopItemWidth();
+    if (ImGui::Button("Submit##vme_finances")) {
+        transaction::total_saving = new_total_saving;
+        current_buf += build_str("total saving is now: Rp. ", transaction::total_saving, "\n");
+        log_tty("%s", build_str("total saving is now: Rp. ", transaction::total_saving).c_str());
+    }
+
+    if (ImGui::Button("Log all transactions")) {
+        for (transaction t : transactions) {
+            current_buf += build_str(t.to_string().c_str(), "\n");
+            log_tty("%s", t.to_string().c_str());
+        }
+    }
+
     separator_heading("Add new item");
 	ImGui::TextUnformatted("Name: "); ImGui::SameLine(0, 0);
 	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x); ImGui::InputText("##vme_name_input", new_item_name, sizeof(new_item_name)); ImGui::PopItemWidth();
@@ -45,7 +62,7 @@ void side_bar() {
 	}
 
 	separator_heading("Controls");
-	if (ImGui::Button("Remove selected item")) {
+	if (ImGui::Button("Sell selected item")) {
 		if (selected_item != nullptr) {
 			selected_item->remove_from_items();
 			selected_item = nullptr;
@@ -57,8 +74,8 @@ void side_bar() {
         item.add_to_items();
 	}
 
-	if (ImGui::Button("Pop last item")) {
-		if (items.size() > 0) items.pop_back();
+	if (ImGui::Button("Sell last item")) {
+		if (items.size() > 0) items[items.size() - 1].remove_from_items();
 	}
 
 	if (ImGui::Button("Switch display mode")) {

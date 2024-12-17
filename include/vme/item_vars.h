@@ -13,6 +13,20 @@ enum DISPLAY_TYPE {
     TABLE = 2
 };
 
+struct transaction {
+    static float total_saving;
+    static float total_expense;
+
+    Item item;
+    float current_saving;
+    float current_expense;
+
+    transaction(Item item);
+    std::string to_string();
+    void compute_expense();
+    void compute_gain();
+};
+
 std::string display_type_to_string(DISPLAY_TYPE type);
 
 extern DISPLAY_TYPE current_display_type;
@@ -30,6 +44,9 @@ extern float new_item_buy_price;
 extern float new_item_sell_price;
 extern int new_item_stock;
 extern std::unordered_map<std::string, ImVec4> category_color_map;
+
+extern std::vector<transaction> transactions;
+extern float new_total_saving;
 
 #endif
 

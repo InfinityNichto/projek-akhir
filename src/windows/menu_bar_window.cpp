@@ -91,10 +91,15 @@ void tab_bar() {
 	if (!ImGui::BeginTabBar("##tab_bar")) return;
 
 	if (ImGui::BeginTabItem("Workspace")) {
-		ImGui::EndTabItem();
+        workspace_open = true;
+		log_open = false;
+
+        ImGui::EndTabItem();
 	}
 
 	if (ImGui::BeginTabItem("Logs")) {
+        log_open = true;
+
 		ImGui::EndTabItem();
 	}
 

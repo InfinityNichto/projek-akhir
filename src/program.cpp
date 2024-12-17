@@ -7,6 +7,7 @@
 #include "vars.h"
 #include "windows/menu_bar_window.h"
 #include "windows/workspace.h"
+#include "windows/log.h"
 
 #define GL_WINDOW_SIZE 1280
 #define GL_WINDOW_HEIGHT 720
@@ -131,6 +132,7 @@ void main_loop() {
 
 		menu_bar_window();
 		workspace();
+        if (log_open) log();
 
         ImGui::Render();
         glViewport(0, 0, 1280, 720);

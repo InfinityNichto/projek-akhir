@@ -2,6 +2,7 @@
 #include "vme/item_vars.h"
 #include "utils.h"
 #include "vars.h"
+#include "windows/log.h"
 
 #include <string>
 #include <vector>
@@ -41,6 +42,11 @@ void Item::add_to_items() {
 	}
 	border_color = category_color_map[category]; 
 
+    transactions.push_back(*this);
+    transactions[transactions.size() - 1].compute_expense();
+    current_buf += build_str("[buy] current total saving: Rp. ", transaction::total_saving, ", current total expense: Rp. ", transaction::total_expense, "\n");
+    log_tty("%s", build_str("[buy] current total saving: Rp. ", transaction::total_saving, ", current total expense: Rp. ", transaction::total_expense).c_str());
+
 	items.push_back(*this);
 }
 
@@ -53,6 +59,10 @@ void Item::remove_from_items() {
         }
         i++;
     }
+
+    transactions[transactions.size() - 1].compute_gain();
+    current_buf += build_str("[sell] current total saving: Rp. ", transaction::total_saving, ", current total expense: Rp. ", transaction::total_expense, "\n");
+    log_tty("%s", build_str("[sell] current total saving: Rp. ", transaction::total_saving, ", current total expense: Rp. ", transaction::total_expense).c_str());
 }
 
 int Item::get_id() const {

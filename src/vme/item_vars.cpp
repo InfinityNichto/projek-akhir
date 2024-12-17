@@ -15,6 +15,30 @@ ImVec4 rgb_selected_color = ImVec4(1, 0, 0, 1);
 size_t rgb_ptr = 0;
 ImVec2 next_start_pos;
 
+std::vector<transaction> transactions = {};
+float transaction::total_saving = 0;
+float transaction::total_expense = 0;
+transaction::transaction(Item item) : item(item), current_saving(0), current_expense(0) {}
+
+std::string transaction::to_string() {
+    return build_str("[item: ", item.to_string().c_str(), " current saving: Rp. ", current_saving, "current expense: Rp. ", current_expense, "]");
+}
+
+void transaction::compute_expense() {
+    total_saving -= item.buy_price * item.stock;
+    total_expense += item.buy_price * item.stock;
+
+    current_saving = total_saving;
+    current_expense = total_expense;
+}
+
+void transaction::compute_gain() {
+    total_saving += item.sell_price * item.stock;
+
+    current_saving = total_saving;
+    current_expense = total_expense;
+}
+
 std::string display_type_to_string(DISPLAY_TYPE type) {
 	switch (type) {
 	  case RANDOM: return "Randomized";
@@ -29,4 +53,4 @@ char new_item_category[64] = "";
 float new_item_buy_price = 0;
 float new_item_sell_price = 0;
 int new_item_stock = 0;
-
+float new_total_saving = 0;

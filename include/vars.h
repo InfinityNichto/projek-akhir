@@ -23,6 +23,9 @@ extern std::random_device rand_dev;
 extern std::mt19937 rng;
 extern long global_tick;
 
+extern bool workspace_open;
+extern bool log_open;
+
 ImVec2 display_size();
 rect get_current_window_data();
 void update_prev_window_data();

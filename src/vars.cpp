@@ -12,6 +12,9 @@ float fps;
 float glyph_size;
 long global_tick = 0;
 
+bool workspace_open = true;
+bool log_open = false;
+
 std::random_device rand_dev;
 std::mt19937 rng(rand());
 
